@@ -18,6 +18,15 @@
 
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
 
+#define ENTERING 1
+#define EXITING 0
+
+typedef struct CAR_STATUS
+{
+    double dist;
+    int status;
+} CAR_STATUS;
+
 class BikeWarningRSU: public BaseWaveApplLayer {
     public:
         virtual void initialize(int stage);
@@ -25,6 +34,7 @@ class BikeWarningRSU: public BaseWaveApplLayer {
     protected:
         BaseMobility* mobi;
         double RSU_RANGE;
+        std::map<std::string, CAR_STATUS> cars_in_junct;
     protected:
         virtual void onBeacon(WaveShortMessage* wsm);
         virtual void onData(WaveShortMessage* wsm);

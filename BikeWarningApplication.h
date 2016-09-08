@@ -27,6 +27,7 @@ class BikeWarningApplication : public BaseWaveApplLayer
         Veins::TraCIMobility* mobility;
         Veins::TraCICommandInterface *traci;
         Veins::TraCICommandInterface::Vehicle *traciVehicle;
+        std::string myID;
         virtual void initialize(int stage);
         virtual void finish();
         virtual void handleSelfMsg(cMessage *msg);

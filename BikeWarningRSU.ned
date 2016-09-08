@@ -18,6 +18,9 @@ import org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer;
 
 simple BikeWarningRSU extends BaseWaveApplLayer
 {
+    parameters:
+        double RSURange;
+    
     @class(BikeWarningRSU);
     @display("i=block/app2");
 }

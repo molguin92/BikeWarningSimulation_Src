@@ -15,9 +15,11 @@
 
 #include "BikeWarningApplication.h"
 #include "veins/modules/application/early_warning/json.hpp"
+#include "veins/modules/mobility/traci/TraCICommandInterface.h"
 
 Define_Module(BikeWarningApplication);
 using json = nlohmann::json;
+using Junction = Veins::TraCICommandInterface::Junction;
 
 void BikeWarningApplication::initialize(int stage)
 {
@@ -32,6 +34,9 @@ void BikeWarningApplication::initialize(int stage)
         mobility = Veins::TraCIMobilityAccess().get(getParentModule());
         traci = mobility->getCommandInterface();
         traciVehicle = mobility->getVehicleCommandInterface();
+        break;
+    case 1:
+        myID = mobility->getExternalId();
         break;
     default:
         break;
@@ -79,7 +84,9 @@ void BikeWarningApplication::handleSelfMsg(cMessage *msg)
 
 void BikeWarningApplication::onData(WaveShortMessage *wsm)
 {
-    std::cout << std::string(wsm->getWsmData()) << std::endl;
+    if(wsm->getRecipientAddress() == myId)
+        // only "receive" the message if it's for me
+        std::cout << "CAR " << myID << ": " << std::string(wsm->getWsmData()) << std::endl;
 }
 
 void BikeWarningApplication::onBeacon(WaveShortMessage *wsm)

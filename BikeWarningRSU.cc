@@ -23,7 +23,8 @@ void BikeWarningRSU::initialize(int stage) {
     BaseWaveApplLayer::initialize(stage);
     if (stage == 0) {
         mobi = dynamic_cast<BaseMobility*> (getParentModule()->getSubmodule("mobility"));
-        RSU_RANGE = 30.0; //par("RSURange").doubleValue();
+        RSU_RANGE = par("RSURange").doubleValue();
+
     }
 }
 
@@ -39,15 +40,48 @@ void BikeWarningRSU::onBeacon(WaveShortMessage* wsm)
     Coord* car_pos = new Coord(pos_x, pos_y, rsu_pos.z);
     double dist = rsu_pos.distance(*car_pos);
 
-    if(dist <= RSU_RANGE)
+    if (dist <= RSU_RANGE)
     {
-        t_channel channel = dataOnSch ? type_SCH : type_CCH;
-        WaveShortMessage* msg = prepareWSM("data", dataLengthBits, channel, dataPriority, wsm->getSenderAddress(), 2);
-        msg->setWsmData("RSU_ACK");
-        sendWSM(msg);
+        if(cars_in_junct.find(id) == cars_in_junct.end())
+        {
+            // not previously seen
+            // add to hashmap
+            std::cout << "RSU: Seeing " << id << " for the first time." << std::endl;
+
+            CAR_STATUS C;
+            C.dist = dist;
+            C.status = ENTERING;
+            cars_in_junct[id] = C;
+
+            t_channel channel = dataOnSch ? type_SCH : type_CCH;
+            WaveShortMessage* msg = prepareWSM("data", dataLengthBits, channel, dataPriority, wsm->getSenderAddress(), 2);
+            msg->setWsmData("RSU_ACK");
+            sendWSM(msg);
+        }
+        else
+        {
+            double prev_dist = cars_in_junct[id].dist;
+            int prev_status = cars_in_junct[id].status;
+
+            if (prev_status == ENTERING && prev_dist < dist)
+            {
+                cars_in_junct[id].status = EXITING;
+            }
+            else if(prev_status == EXITING && prev_dist > dist)
+            {
+                cars_in_junct[id].status = ENTERING;
+            }
+            cars_in_junct[id].dist = dist;
+        }
     }
-
-
+    else
+    {
+        if(cars_in_junct.find(id) != cars_in_junct.end())
+        {
+            std::cout << "RSU: " << id << " is leaving the junction." << std::endl;
+            cars_in_junct.erase(id);
+        }
+    }
 }
 
 void BikeWarningRSU::onData(WaveShortMessage* wsm) {
