@@ -35,6 +35,9 @@ class BikeWarningRSU: public BaseWaveApplLayer {
         BaseMobility* mobi;
         double RSU_RANGE;
         std::map<std::string, CAR_STATUS> cars_in_junct;
+        std::list<std::string> unique_ids;
+        std::vector<std::string> in_edges;
+        std::vector<std::string> out_edges;
     protected:
         virtual void onBeacon(WaveShortMessage* wsm);
         virtual void onData(WaveShortMessage* wsm);

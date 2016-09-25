@@ -37,6 +37,7 @@ void BikeWarningApplication::initialize(int stage)
         break;
     case 1:
         myID = mobility->getExternalId();
+
         break;
     default:
         break;
@@ -50,20 +51,20 @@ void BikeWarningApplication::finish()
 
 void BikeWarningApplication::handleSelfMsg(cMessage *msg)
 {
-    //std::cout << "x " << traci->junction("cluster_15159499_18038479_21113262_347787163_8851291").getPosition().x << std::endl;
-    //std::cout << "y " << traci->junction("cluster_15159499_18038479_21113262_347787163_8851291").getPosition().y << std::endl;
-    switch (msg->getKind()) {
+   switch (msg->getKind()) {
         case SEND_BEACON_EVT: {
             //std::cout << "Sending beacon: ";
             WaveShortMessage* wsm = prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, -1, -1);
 
             Coord pos = mobility->getCurrentPosition();
             std::string id = mobility->getExternalId();
+            std::string lane_id = traciVehicle->getLaneId();
 
             json data_j = {
                     {"id", id},
                     {"pos_x", pos.x},
-                    {"pos_y", pos.y}
+                    {"pos_y", pos.y},
+                    {"lane_id", lane_id}
             };
 
             std::string jdata = data_j.dump();

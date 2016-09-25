@@ -20,6 +20,9 @@ simple BikeWarningRSU extends BaseWaveApplLayer
 {
     parameters:
         double RSURange;
+        string IN_EDGES;
+        string OUT_EDGES;
+        string JUNCTION;
     
     @class(BikeWarningRSU);
     @display("i=block/app2");
