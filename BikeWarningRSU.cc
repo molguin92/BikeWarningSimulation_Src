@@ -21,6 +21,7 @@ using json = nlohmann::json;
 
 void BikeWarningRSU::initialize(int stage) {
     BaseWaveApplLayer::initialize(stage);
+
     if (stage == 0) {
         mobi = dynamic_cast<BaseMobility*>(getParentModule()->getSubmodule(
                 "mobility"));
@@ -36,10 +37,16 @@ void BikeWarningRSU::initialize(int stage) {
 
         while(tokenizer2.hasMoreTokens())
             out_edges.push_back(tokenizer2.nextToken());
+
     }
 }
 
 void BikeWarningRSU::onBeacon(WaveShortMessage* wsm) {
+
+    /*** TEST ***/
+    algo.probableTurn(0.0, 0.0, 0.0, 0.0, 0.0,0.0, "blah blag");
+
+
     json data_j = json::parse(std::string(wsm->getWsmData()));
     //std::cout << data_j.dump(4) << std::endl;
     std::string id = data_j["id"];

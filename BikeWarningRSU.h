@@ -17,6 +17,7 @@
 #define BIKEWARNINGRSU_H_
 
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
+#include "DecisionAlgorithm.h"
 
 #define ENTERING 1
 #define EXITING 0
@@ -38,6 +39,7 @@ class BikeWarningRSU: public BaseWaveApplLayer {
         std::list<std::string> unique_ids;
         std::vector<std::string> in_edges;
         std::vector<std::string> out_edges;
+        DecisionAlgorithm algo;
     protected:
         virtual void onBeacon(WaveShortMessage* wsm);
         virtual void onData(WaveShortMessage* wsm);
