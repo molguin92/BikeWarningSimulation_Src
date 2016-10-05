@@ -57,11 +57,13 @@ void BikeWarningApplication::handleSelfMsg(cMessage *msg)
             WaveShortMessage* wsm = prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, -1, -1);
 
             Coord pos = mobility->getCurrentPosition();
+            double speed = mobility->getSpeed();
             std::string id = mobility->getExternalId();
             std::string lane_id = traciVehicle->getLaneId();
 
             json data_j = {
                     {"id", id},
+                    {"vel", speed},
                     {"pos_x", pos.x},
                     {"pos_y", pos.y},
                     {"lane_id", lane_id}

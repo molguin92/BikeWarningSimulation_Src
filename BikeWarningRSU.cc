@@ -29,67 +29,43 @@ void BikeWarningRSU::initialize(int stage) {
         std::string in_e = par("IN_EDGES").stringValue();
         std::string out_e = par("OUT_EDGES").stringValue();
 
-        cStringTokenizer tokenizer1(in_e.c_str());
-        cStringTokenizer tokenizer2(out_e.c_str());
+        cStringTokenizer entry_lanes(in_e.c_str());
+        cStringTokenizer exit_lanes(out_e.c_str());
 
-        while(tokenizer1.hasMoreTokens())
-            in_edges.push_back(tokenizer1.nextToken());
+        while(entry_lanes.hasMoreTokens())
+            algo.addEntryLane(entry_lanes.nextToken());
 
-        while(tokenizer2.hasMoreTokens())
-            out_edges.push_back(tokenizer2.nextToken());
+        while(exit_lanes.hasMoreTokens())
+            algo.addExitLane(exit_lanes.nextToken());
 
+    }
+    else
+    {
+        rsu_pos = mobi->getCurrentPosition();
     }
 }
 
 void BikeWarningRSU::onBeacon(WaveShortMessage* wsm) {
 
-    /*** TEST ***/
-    algo.probableTurn(0.0, 0.0, 0.0, 0.0, 0.0,0.0, "blah blag");
-
 
     json data_j = json::parse(std::string(wsm->getWsmData()));
-    //std::cout << data_j.dump(4) << std::endl;
-    std::string id = data_j["id"];
-    float pos_x = data_j["pos_x"];
-    float pos_y = data_j["pos_y"];
 
-    Coord rsu_pos = mobi->getCurrentPosition();
+    std::string id = data_j["id"];
+    double vel = data_j["vel"];
+    double pos_x = data_j["pos_x"];
+    double pos_y = data_j["pos_y"];
+    std::string lane_id = data_j["lane_id"];
+
     Coord* car_pos = new Coord(pos_x, pos_y, rsu_pos.z);
     double dist = rsu_pos.distance(*car_pos);
 
+    // check if car is in range
     if (dist <= RSU_RANGE) {
-        if (cars_in_junct.find(id) == cars_in_junct.end()) {
-            // not previously seen
-            // add to hashmap and list of unique car IDs
-            std::cout << "RSU: Seeing " << id << " for the first time."
-                    << std::endl;
-
-            unique_ids.push_back(id);
-
-            CAR_STATUS C;
-            C.dist = dist;
-            C.status = ENTERING;
-            cars_in_junct[id] = C;
-
-            t_channel channel = dataOnSch ? type_SCH : type_CCH;
-            WaveShortMessage* msg = prepareWSM("data", dataLengthBits, channel,
-                    dataPriority, wsm->getSenderAddress(), 2);
-            msg->setWsmData("RSU_ACK");
-            sendWSM(msg);
-        } else {
-            double prev_dist = cars_in_junct[id].dist;
-            int prev_status = cars_in_junct[id].status;
-
-            if (prev_status == ENTERING && prev_dist < dist) {
-                cars_in_junct[id].status = EXITING;
-            } else if (prev_status == EXITING && prev_dist > dist) {
-                cars_in_junct[id].status = ENTERING;
-            }
-            cars_in_junct[id].dist = dist;
+        if(algo.checkTurn(vel, pos_x, pos_y, id, lane_id) == 1)
+        {
+            std::cout << "TURN WARNING FOR " << id << std::endl;
+            // TODO: actually send message here
         }
-    } else if (cars_in_junct.find(id) != cars_in_junct.end()) {
-        std::cout << "RSU: " << id << " is leaving the junction." << std::endl;
-        cars_in_junct.erase(id);
     }
 
 }
@@ -98,10 +74,6 @@ void BikeWarningRSU::onData(WaveShortMessage* wsm) {
 }
 
 void BikeWarningRSU::finish() {
-    for(std::string id: unique_ids)
-    {
-        std::cout << id << std::endl;
-    }
 
     BaseWaveApplLayer::finish();
 }

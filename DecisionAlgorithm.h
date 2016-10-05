@@ -13,15 +13,19 @@
 #define DECISIONALGORITHM_H_
 
 #define DECISION_ALGO_SCRIPT "algorithm"
-#define DECISION_ALGO_FUNC "detect_turn"
+#define DECISION_ALGO_FUNC "detect_turn_car"
+#define DECISION_ALGO_ADDENTRYLANE "add_entry_lane"
+#define DECISION_ALGO_ADDEXITLANE "add_exit_lane"
 
 class DecisionAlgorithm {
 public:
     DecisionAlgorithm();
     virtual ~DecisionAlgorithm();
-    bool probableTurn(double pvel, double pposx, double pposy, double cvel, double cposx, double cposy, std::string car_id);
+    bool checkTurn(double velocity, double pos_x, double pos_y, std::string car_id, std::string lane_id);
+    void addEntryLane(std::string lane_id);
+    void addExitLane(std::string lane_id);
 protected:
-    PyObject *pName, *pFunc, *pModule, *pArgs;
+    PyObject *pName, *pFunc, *pModule, *pArgs, *pAddEntry, *pAddExit;
 };
 
 #endif /* DECISIONALGORITHM_H_ */
