@@ -56,7 +56,7 @@ void DecisionAlgorithm::addExitLane(std::string lane_id)
     Py_DECREF(pArgs);
 }
 
-bool DecisionAlgorithm::checkTurn(double velocity, double pos_x, double pos_y, std::string car_id, std::string lane_id)
+double DecisionAlgorithm::checkTurn(double velocity, double pos_x, double pos_y, std::string car_id, std::string lane_id)
 {
 
     pArgs = PyTuple_New(5);
@@ -74,7 +74,8 @@ bool DecisionAlgorithm::checkTurn(double velocity, double pos_x, double pos_y, s
         throw -1;
     }
 
-    long final = PyLong_AsLong(result);
+    //long final = PyLong_AsLong(result);
+    double final = PyFloat_AsDouble(result);
     Py_DECREF(pArgs);
 
     return final;// == final;

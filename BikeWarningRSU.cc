@@ -61,11 +61,14 @@ void BikeWarningRSU::onBeacon(WaveShortMessage* wsm) {
 
     // check if car is in range
     if (dist <= RSU_RANGE) {
-        if(algo.checkTurn(vel, pos_x, pos_y, id, lane_id) == 1)
+        /*if(algo.checkTurn(vel, pos_x, pos_y, id, lane_id) == 1)
         {
             std::cout << "TURN WARNING FOR " << id << std::endl;
             // TODO: actually send message here
-        }
+        }*/
+
+        double prob = algo.checkTurn(vel, pos_x, pos_y, id, lane_id);
+        std::cout << id << " - turn prob. value: " << prob << std::endl;
     }
 
 }

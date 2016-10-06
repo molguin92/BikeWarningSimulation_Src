@@ -21,7 +21,7 @@ class DecisionAlgorithm {
 public:
     DecisionAlgorithm();
     virtual ~DecisionAlgorithm();
-    bool checkTurn(double velocity, double pos_x, double pos_y, std::string car_id, std::string lane_id);
+    double checkTurn(double velocity, double pos_x, double pos_y, std::string car_id, std::string lane_id);
     void addEntryLane(std::string lane_id);
     void addExitLane(std::string lane_id);
 protected:
