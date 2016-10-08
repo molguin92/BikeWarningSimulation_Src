@@ -37,7 +37,8 @@ void BikeWarningApplication::initialize(int stage)
         break;
     case 1:
         myID = mobility->getExternalId();
-
+        if(myID.substr(0, 4).compare("bike") == 0)
+            isBike = true;
         break;
     default:
         break;
@@ -51,48 +52,75 @@ void BikeWarningApplication::finish()
 
 void BikeWarningApplication::handleSelfMsg(cMessage *msg)
 {
-   switch (msg->getKind()) {
-        case SEND_BEACON_EVT: {
-            //std::cout << "Sending beacon: ";
-            WaveShortMessage* wsm = prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, -1, -1);
-
-            Coord pos = mobility->getCurrentPosition();
-            double speed = mobility->getSpeed();
-            std::string id = mobility->getExternalId();
-            std::string lane_id = traciVehicle->getLaneId();
-
-            json data_j = {
-                    {"id", id},
-                    {"vel", speed},
-                    {"pos_x", pos.x},
-                    {"pos_y", pos.y},
-                    {"lane_id", lane_id}
-            };
-
-            std::string jdata = data_j.dump();
-            //std::cout << jdata << std::endl;
-
-            wsm->setWsmData(jdata.c_str());
-            sendWSM(wsm);
-            scheduleAt(simTime() + par("beaconInterval").doubleValue(), sendBeaconEvt);
-            break;
-        }
-        default: {
-            if (msg)
-                DBG << "APP: Error: Got Self Message of unknown kind! Name: " << msg->getName() << endl;
-            break;
-        }
-    }
+    if(isBike)
+        bikeHandleSelfMsg(msg);
+    else
+        carHandleSelfMsg(msg);
 }
 
+void BikeWarningApplication::carHandleSelfMsg(cMessage *msg)
+{
+    switch (msg->getKind()) {
+            case SEND_BEACON_EVT: {
+                //std::cout << "Sending beacon: ";
+                WaveShortMessage* wsm = prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, -1, -1);
+
+                Coord pos = mobility->getCurrentPosition();
+                double speed = mobility->getSpeed();
+                std::string id = mobility->getExternalId();
+                std::string lane_id = traciVehicle->getLaneId();
+
+                json data_j = {
+                        {"id", id},
+                        {"vel", speed},
+                        {"pos_x", pos.x},
+                        {"pos_y", pos.y},
+                        {"lane_id", lane_id}
+                };
+
+                std::string jdata = data_j.dump();
+                //std::cout << jdata << std::endl;
+
+                wsm->setWsmData(jdata.c_str());
+                sendWSM(wsm);
+                scheduleAt(simTime() + par("beaconInterval").doubleValue(), sendBeaconEvt);
+                break;
+            }
+            default: {
+                if (msg)
+                    DBG << "APP: Error: Got Self Message of unknown kind! Name: " << msg->getName() << endl;
+                break;
+            }
+        }
+}
+
+void BikeWarningApplication::bikeHandleSelfMsg(cMessage *msg){}
+
 void BikeWarningApplication::onData(WaveShortMessage *wsm)
+{
+    if(isBike)
+        bikeOnData(wsm);
+    else
+        carOnData(wsm);
+}
+
+void BikeWarningApplication::carOnData(WaveShortMessage *wsm)
 {
     if(wsm->getRecipientAddress() == myId)
         // only "receive" the message if it's for me
         std::cout << "CAR " << myID << ": " << std::string(wsm->getWsmData()) << std::endl;
 }
 
+void BikeWarningApplication::bikeOnData(WaveShortMessage *wsm){}
+
 void BikeWarningApplication::onBeacon(WaveShortMessage *wsm)
 {
+    if(isBike)
+        bikeOnBeacon(wsm);
+    else
+        carOnBeacon(wsm);
 }
 
+void BikeWarningApplication::carOnBeacon(WaveShortMessage *wsm){}
+
+void BikeWarningApplication::bikeOnBeacon(WaveShortMessage *wsm){}

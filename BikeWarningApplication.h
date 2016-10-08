@@ -28,11 +28,22 @@ class BikeWarningApplication : public BaseWaveApplLayer
         Veins::TraCICommandInterface *traci;
         Veins::TraCICommandInterface::Vehicle *traciVehicle;
         std::string myID;
-        virtual void initialize(int stage);
-        virtual void finish();
-        virtual void handleSelfMsg(cMessage *msg);
-        virtual void onData(WaveShortMessage *wsm);
-        virtual void onBeacon(WaveShortMessage *wsm);
+        bool isBike = false;
+        void initialize(int stage);
+        void finish();
+        void handleSelfMsg(cMessage *msg);
+        void onData(WaveShortMessage *wsm);
+        void onBeacon(WaveShortMessage *wsm);
+
+    private:
+        void carHandleSelfMsg(cMessage *msg);
+        void bikeHandleSelfMsg(cMessage *msg);
+
+        void carOnData(WaveShortMessage *wsm);
+        void carOnBeacon(WaveShortMessage *wsm);
+
+        void bikeOnData(WaveShortMessage *wsm);
+        void bikeOnBeacon(WaveShortMessage *wsm);
 };
 
 #endif
